@@ -2,6 +2,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 import cgi
 import socket
 
+
 class helloHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path.endswith('/maketransaction'):
@@ -46,16 +47,18 @@ class helloHandler(BaseHTTPRequestHandler):
             output = ''
             output += '<html><body>'
             output += '<h1>The amount of money you entered is</h1>'
-            output += '<h1>%s' % newAmount +'</h1'
+            output += '<h1>%s' % newAmount + '</h1'
             output += '</body></html>'
 
             self.wfile.write(output.encode())
 
+
 def main():
-    PORT = 8000
-    server = HTTPServer(('', PORT), helloHandler)
-    print('Server running on port %s' % PORT)
+    port = 8000
+    server = HTTPServer(('', port), helloHandler)
+    print('Server running on port %s' % port)
     server.serve_forever()
+
 
 if __name__ == '__main__':
     main()

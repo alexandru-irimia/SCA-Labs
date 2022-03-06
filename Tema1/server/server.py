@@ -12,8 +12,8 @@ s.listen(5)
 print("socket is listening")
 
 while True:
-    c, addr = s.accept()
-    print('Got connection from', addr)
+    c, address = s.accept()
+    print('Got connection from', address)
 
     c.send('connected'.encode())
     clientMessage = c.recv(1024).decode()
