@@ -16,6 +16,8 @@ class helloHandler(BaseHTTPRequestHandler):
 
             output += '<form method="POST"enctype="multipart/form-data" action="/maketransaction">'
             output += '<input name="numberCard" type="text" placeholder="Add your card number">'
+            output += '<br><br><input name="expirationDate" type="text" placeholder="Expiration Date">'
+            output += '<input name="cvv" type="text" placeholder="CVV">'
             output += '<br><br><input name="amount" type="text" placeholder="Add some money">'
             output += '<br><br><input type="submit" value="Pay">'
             output += '</form>'
@@ -33,6 +35,8 @@ class helloHandler(BaseHTTPRequestHandler):
                 amount = fields.get('amount')
                 tmpNumberCard = fields.get('numberCard')
                 numberCard = ''.join([str(elem) for elem in tmpNumberCard])
+                expirationDate = ''.join([str(elem) for elem in fields.get('expirationDate')])
+                cvv = ''.join([str(elem) for elem in fields.get('cvv')])
 
 
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -41,6 +45,9 @@ class helloHandler(BaseHTTPRequestHandler):
             if s.recv(1024).decode() == "connected":
                 s.send(amount[0].encode())
                 s.send(numberCard.encode())
+                s.send(expirationDate.encode())
+                s.send(cvv.encode())
+                
                 newAmount = s.recv(1024).decode()
                 newCardNumber = s.recv(1024).decode()
             s.close()

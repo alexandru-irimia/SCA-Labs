@@ -18,6 +18,9 @@ while True:
     c.send('connected'.encode())
     clientAmount = c.recv(1024).decode()
     clientCardNumber = c.recv(1024).decode()
+    cardExpirationDate = c.recv(1024).decode()
+    cardCvv = c.recv(1024).decode()
+
     clientAmount += " Dollars"
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
