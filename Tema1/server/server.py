@@ -16,7 +16,19 @@ while True:
     print('Got connection from', address)
 
     c.send('connected'.encode())
-    clientMessage = c.recv(1024).decode()
-    clientMessage += " Dollars"
-    c.send(clientMessage.encode())
+    clientAmount = c.recv(1024).decode()
+    clientCardNumber = c.recv(1024).decode()
+    clientAmount += " Dollars"
+
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.connect(('127.0.0.1', 12346))
+
+    if server.recv(1024).decode() == "connected":
+        server.send(clientCardNumber.encode())
+        newCardNumber = server.recv(1024).decode()
+
+    c.send(clientAmount.encode())
+    c.send(newCardNumber.encode())
+
+    server.close()
     c.close()

@@ -15,8 +15,9 @@ class helloHandler(BaseHTTPRequestHandler):
             output += '<h1>Enter an amount of money</h1>'
 
             output += '<form method="POST"enctype="multipart/form-data" action="/maketransaction">'
-            output += '<input name="money" type="text" placeholder="Add some money">'
-            output += '<input type="submit" value="Pay">'
+            output += '<input name="numberCard" type="text" placeholder="Add your card number">'
+            output += '<br><br><input name="amount" type="text" placeholder="Add some money">'
+            output += '<br><br><input type="submit" value="Pay">'
             output += '</form>'
             output += '</body></html>'
 
@@ -29,15 +30,19 @@ class helloHandler(BaseHTTPRequestHandler):
 
             if ctype == 'multipart/form-data':
                 fields = cgi.parse_multipart(self.rfile, pdict)
-                amount = fields.get('money')
+                amount = fields.get('amount')
+                tmpNumberCard = fields.get('numberCard')
+                numberCard = ''.join([str(elem) for elem in tmpNumberCard])
+
 
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect(('127.0.0.1', 12345))
 
             if s.recv(1024).decode() == "connected":
                 s.send(amount[0].encode())
+                s.send(numberCard.encode())
                 newAmount = s.recv(1024).decode()
-
+                newCardNumber = s.recv(1024).decode()
             s.close()
 
             self.send_response(301)
@@ -47,7 +52,8 @@ class helloHandler(BaseHTTPRequestHandler):
             output = ''
             output += '<html><body>'
             output += '<h1>The amount of money you entered is</h1>'
-            output += '<h1>%s' % newAmount + '</h1'
+            output += '<h1>%s' % newAmount + '</h1>'
+            output += '<h1>%s' % newCardNumber + '</h1>'
             output += '</body></html>'
 
             self.wfile.write(output.encode())
