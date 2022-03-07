@@ -1,6 +1,6 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import cgi
-import socket
+from Tema1.protocol.client_protocol import *
 
 
 class helloHandler(BaseHTTPRequestHandler):
@@ -27,41 +27,64 @@ class helloHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         if self.path.endswith('/maketransaction'):
+            output = ''
+            output += '<html><body>'
+
             ctype, pdict = cgi.parse_header(self.headers.get('content-type'))
             pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
 
             if ctype == 'multipart/form-data':
                 fields = cgi.parse_multipart(self.rfile, pdict)
                 amount = fields.get('amount')
-                tmpNumberCard = fields.get('numberCard')
-                numberCard = ''.join([str(elem) for elem in tmpNumberCard])
-                expirationDate = ''.join([str(elem) for elem in fields.get('expirationDate')])
+                tmp_number_card = fields.get('numberCard')
+                number_card = ''.join([str(elem) for elem in tmp_number_card])
+                expiration_date = ''.join([str(elem) for elem in fields.get('expirationDate')])
                 cvv = ''.join([str(elem) for elem in fields.get('cvv')])
 
-
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s = socket(AF_INET, SOCK_STREAM)
             s.connect(('127.0.0.1', 12345))
 
             if s.recv(1024).decode() == "connected":
-                s.send(amount[0].encode())
-                s.send(numberCard.encode())
-                s.send(expirationDate.encode())
-                s.send(cvv.encode())
+                resp = setup_sub_protocol(s)
+                output += '<h1>%s' % resp + '</h1>'
+                resp = json.loads(resp)
+                payload = {
+                    'PM': {
+                        'PI': {
+                            'CardN': number_card,
+                            'CardExp': expiration_date,
+                            'CCode': cvv,
+                            'SID': resp['SID'],
+                            'Amount': amount
+                        }
+                    },
+                    'PO': {
+                        'OrderDesc': 'buy',
+                        'SID': resp['SID'],
+                        'Amount': amount
+                    }
+                }
+                resp = exchange_sub_protocol(json.dumps(payload).encode(), s)
+                output += '<h1>%s' % resp + '</h1>'
+                resp = json.loads(resp)
 
-                newAmount = s.recv(1024).decode()
-                newCardNumber = s.recv(1024).decode()
+                pg = socket(AF_INET, SOCK_STREAM)
+                pg.connect(('127.0.0.1', 12346))
+                payload = {
+                    'SID': resp['SID'],
+                    'Amount': amount,
+                    'key': open('client/key.pub', 'rb').read().decode()
+                }
+                if pg.recv(1024).decode() == "connected":
+                    output += '<h1>%s' % resolution_sub_protocol(json.dumps(payload).encode(), pg) + '</h1>'
             s.close()
+
+            output += '</body></html>'
 
             self.send_response(301)
             self.send_header('content-type', 'text/html')
             self.end_headers()
             self.send_header('Location', '/amount')
-            output = ''
-            output += '<html><body>'
-            output += '<h1>The amount of money you entered is</h1>'
-            output += '<h1>%s' % newAmount + '</h1>'
-            output += '<h1>%s' % newCardNumber + '</h1>'
-            output += '</body></html>'
 
             self.wfile.write(output.encode())
 

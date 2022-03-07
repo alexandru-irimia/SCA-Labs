@@ -1,6 +1,6 @@
-import socket
+from Tema1.protocol.server_protocol import *
 
-s = socket.socket()
+s = socket()
 print("Socket successfully created")
 
 port = 12345
@@ -16,22 +16,14 @@ while True:
     print('Got connection from', address)
 
     c.send('connected'.encode())
-    clientAmount = c.recv(1024).decode()
-    clientCardNumber = c.recv(1024).decode()
-    cardExpirationDate = c.recv(1024).decode()
-    cardCvv = c.recv(1024).decode()
 
-    clientAmount += " Dollars"
+    setup_sup_protocol(c)
 
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server = socket(AF_INET, SOCK_STREAM)
     server.connect(('127.0.0.1', 12346))
 
     if server.recv(1024).decode() == "connected":
-        server.send(clientCardNumber.encode())
-        newCardNumber = server.recv(1024).decode()
-
-    c.send(clientAmount.encode())
-    c.send(newCardNumber.encode())
+        exchange_sub_protocol(c, server)
 
     server.close()
     c.close()

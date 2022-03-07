@@ -57,7 +57,7 @@ def encrypt(message: bytes, pub_key: RSA.RsaKey, private_key: RSA.RsaKey = None)
 
 
 def decrypt(payload: bytes, private_key: RSA.RsaKey, public_key: RSA.RsaKey = None) -> bytes:
-    payload = json.loads(payload)
+    payload = json.loads(payload.decode())
     ciphertext, signature = payload['message'].encode().split(b'|')
     ciphertext = base64.b64decode(ciphertext)
     signature = base64.b64decode(signature)
