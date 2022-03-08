@@ -9,9 +9,10 @@ server_pub_key = RSA.importKey(open('../server/key.pub', 'rb').read())
 
 
 def exchange_sub_protocol(s: socket):
+    print('Exchange sub-protocol')
     resp = decrypt(s.recv(2048), private_key, server_pub_key)
     resp = json.loads(resp)
-    print(resp)
+    print(f'From merchant: {resp}')
 
     payload = {
         'Resp': 'OK',
@@ -22,10 +23,11 @@ def exchange_sub_protocol(s: socket):
 
 
 def resolution_sub_protocol(s: socket):
+    print('Resolution sub-protocol')
     global client_pub_key
     resp = decrypt(s.recv(2048), private_key, client_pub_key)
     resp = json.loads(resp)
-    print(resp)
+    print(f'From client: {resp}')
 
     payload = {
         'Resp': 'OK',

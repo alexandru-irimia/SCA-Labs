@@ -46,7 +46,7 @@ class helloHandler(BaseHTTPRequestHandler):
 
             if s.recv(1024).decode() == "connected":
                 resp = setup_sub_protocol(s)
-                output += '<h1>%s' % resp + '</h1>'
+                output += '<h3>Setup sub-protocol: %s' % resp + '</h3>'
                 resp = json.loads(resp)
                 payload = {
                     'PM': {
@@ -65,7 +65,7 @@ class helloHandler(BaseHTTPRequestHandler):
                     }
                 }
                 resp = exchange_sub_protocol(json.dumps(payload).encode(), s)
-                output += '<h1>%s' % resp + '</h1>'
+                output += '<h3>Exchange sub-protocol: %s' % resp + '</h3>'
                 resp = json.loads(resp)
 
                 pg = socket(AF_INET, SOCK_STREAM)
@@ -76,7 +76,8 @@ class helloHandler(BaseHTTPRequestHandler):
                     'key': open('client/key.pub', 'rb').read().decode()
                 }
                 if pg.recv(1024).decode() == "connected":
-                    output += '<h1>%s' % resolution_sub_protocol(json.dumps(payload).encode(), pg) + '</h1>'
+                    output += '<h3>Resolution sub-protocol: %s' % resolution_sub_protocol(json.dumps(payload).encode(),
+                                                                                          pg) + '</h3>'
             s.close()
 
             output += '</body></html>'
